@@ -1,0 +1,135 @@
+---
+title: "modelos_híbridos"
+author: "R. Cantillan"
+date: "2022-05-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# library
+```{r}
+library(tidyverse)
+library(panelr)
+```
+
+
+# load data
+```{r}
+load("/home/rober/Escritorio/ELSOC/ELSOC_W01_v4.01_R.RData") #2016
+load("/home/rober/Escritorio/ELSOC/ELSOC_W02_v3.00_R.RData") #2017
+load("/home/rober/Escritorio/ELSOC/ELSOC_W03_v2.00_R.RData") #2018
+load("/home/rober/Escritorio/ELSOC/ELSOC_W04_v2.01_R.RData") #2019
+load("/home/rober/Escritorio/ELSOC/ELSOC_W05_v1.0_R.RData")  #2021
+```
+
+# select for atrition type
+```{r}
+a$tipo_atricion
+a1<-a%>%dplyr::filter(tipo_atricion==1)
+```
+
+
+# recod and select variables
+```{r}
+a<-elsoc_2016%>%
+  dplyr::mutate (r01_01=ifelse(r01_01>1,1,0)) %>%
+  dplyr::mutate (r01_02=ifelse(r01_02>1,1,0)) %>%
+  dplyr::mutate (r01_03=ifelse(r01_03>1,1,0)) %>%
+  dplyr::mutate (r01_04=ifelse(r01_04>1,1,0)) %>%
+  dplyr::mutate (r01_05=ifelse(r01_05>1,1,0)) %>%
+  dplyr::mutate (r01_06=ifelse(r01_06>1,1,0)) %>%
+  dplyr::mutate (r01_07=ifelse(r01_07>1,1,0)) %>%
+  dplyr::mutate (r01_08=ifelse(r01_08>1,1,0)) %>%
+  dplyr::mutate (r01_09=ifelse(r01_09>1,1,0)) %>%
+  dplyr::mutate (r01_10=ifelse(r01_10>1,1,0)) %>%
+  dplyr::mutate (r01_11=ifelse(r01_11>1,1,0)) %>%
+  dplyr::mutate (r01_12=ifelse(r01_12>1,1,0)) %>%
+  dplyr::mutate (r01_13=ifelse(r01_13>1,1,0)) %>%
+  dplyr::mutate (sexo=case_when(m0_sexo==1~1,TRUE~0))%>%
+  dplyr::mutate (activ_socmov=case_when(c22%in%3:5~1,TRUE~0))%>%
+  dplyr::mutate (extensity=r01_01+r01_02+r01_03+r01_04+r01_05+r01_06+r01_07+
+                   r01_08+r01_09+r01_10+r01_11+r01_12+r01_13)%>%
+  dplyr::select(idencuesta,extensity,c22,activ_socmov,m01,m0_edad,sexo)
+
+a$ola<-1
+
+b<-elsoc_2018%>%
+  dplyr::mutate (r01_01=ifelse(r01_01>1,1,0)) %>%
+  dplyr::mutate (r01_02=ifelse(r01_02>1,1,0)) %>%
+  dplyr::mutate (r01_03=ifelse(r01_03>1,1,0)) %>%
+  dplyr::mutate (r01_04=ifelse(r01_04>1,1,0)) %>%
+  dplyr::mutate (r01_05=ifelse(r01_05>1,1,0)) %>%
+  dplyr::mutate (r01_06=ifelse(r01_06>1,1,0)) %>%
+  dplyr::mutate (r01_07=ifelse(r01_07>1,1,0)) %>%
+  dplyr::mutate (r01_08=ifelse(r01_08>1,1,0)) %>%
+  dplyr::mutate (r01_09=ifelse(r01_09>1,1,0)) %>%
+  dplyr::mutate (r01_10=ifelse(r01_10>1,1,0)) %>%
+  dplyr::mutate (r01_11=ifelse(r01_11>1,1,0)) %>%
+  dplyr::mutate (r01_12=ifelse(r01_12>1,1,0)) %>%
+  dplyr::mutate (r01_13=ifelse(r01_13>1,1,0)) %>%
+  dplyr::mutate (sexo=case_when(m0_sexo==1~1,TRUE~0))%>%
+  dplyr::mutate (activ_socmov=case_when(c22%in%3:5~1,TRUE~0))%>%
+  dplyr::mutate (extensity=r01_01+r01_02+r01_03+r01_04+r01_05+r01_06+r01_07+
+                   r01_08+r01_09+r01_10+r01_11+r01_12+r01_13)%>%
+  dplyr::select(idencuesta,extensity,c22,activ_socmov,m01,m0_edad,sexo)
+
+b$ola<-2
+```
+
+# join a formato long
+```{r}
+elsoc_long<-rbind(a,b)
+```
+
+# definir como datapanel
+```{r}
+elsoc_long <- panel_data(elsoc_long, id = idencuesta, wave = ola)
+```
+
+# Descriptives
+```{r}
+#NA
+elsoc_long[elsoc_long=="-999"] <- NA
+elsoc_long[elsoc_long=="-888"] <- NA
+
+hist(elsoc_long$extensity)
+hist(log(elsoc_long$extensity))
+hist(elsoc_long$c22)
+hist(elsoc_long$activ_socmov)
+```
+
+
+
+```{r}
+m1 <- wbm(extensity ~ activ_socmov | m01+ m0_edad+ sexo, data = elsoc_long)
+summary(m1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
